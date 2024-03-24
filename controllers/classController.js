@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Class = require("../models/Class");
 const Tutor = require("../models/Tutor");
 const { body, validationResult } = require("express-validator");
+const Student = require("../models/Student");
 
 exports.create_class = [
   body("name")
@@ -134,3 +135,27 @@ exports.update_class = [
     }
   },
 ];
+
+exports.get_class_info = async (req, res, next) => {
+  try {
+    if (
+      !req.params.class_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.class_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Class ID is either missing or of invalid type" });
+    }
+
+    const class_ = await Class.findById(req.params.class_id);
+    if (!class_) {
+      return res.status(404).json({ error: "Class not found" });
+    }
+
+    const student_list = await Student.find({ class: class_.id });
+
+    return res.status(200).json({ class: class_, student_list });
+  } catch (err) {
+    return next(err);
+  }
+};
