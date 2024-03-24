@@ -35,7 +35,7 @@ exports.create_class = [
       ) {
         return res
           .status(400)
-          .json({ error: "Tutor ID is either missing or invalid" });
+          .json({ error: "Tutor ID is either missing or of invalid type" });
       }
 
       const tutor = await Tutor.findById(req.params.tutor_id);
@@ -95,7 +95,7 @@ exports.update_class = [
       ) {
         return res
           .status(400)
-          .json({ error: "Class ID is either missing or invalid" });
+          .json({ error: "Class ID is either missing or of invalid type" });
       }
       const class_ = await Class.findById(req.params.class_id);
       if (!class_) {
@@ -108,7 +108,7 @@ exports.update_class = [
       ) {
         return res
           .status(400)
-          .json({ error: "Tutor ID is either missing or invalid" });
+          .json({ error: "Tutor ID is either missing or of invalid type" });
       }
 
       const tutor = await Tutor.findById(req.params.tutor_id);
