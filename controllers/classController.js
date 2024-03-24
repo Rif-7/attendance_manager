@@ -116,9 +116,18 @@ exports.update_class = [
         return res.status(404).json({ error: "Tutor not found" });
       }
 
+      const oldTutor = await Tutor.findById(class_.tutor);
+      oldTutor.class = "";
+      await oldTutor.save();
+
+      tutor.class = class_.id;
+      await tutor.save();
+
       class_.name = req.params.name;
       class_.current = req.params.current_sem;
+      class_.tutor = tutor.id;
       await class_.save();
+
       return res.status(200).json({ success: "Class updated successfully" });
     } catch (err) {
       return next(err);
