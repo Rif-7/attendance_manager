@@ -33,7 +33,7 @@ app.use(function (req, res, next) {
 // error handler
 app.use(function (err, req, res, next) {
   console.log(err);
-  res.json({ error: "An Unexpected Error Occured" });
+  return res.json({ error: "An Unexpected Error Occured" });
 });
 
 module.exports = app;

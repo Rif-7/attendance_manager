@@ -144,3 +144,28 @@ exports.update_student = [
     }
   },
 ];
+
+exports.get_student_info = async (req, res, next) => {
+  try {
+    if (
+      !req.params.student_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.student_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Student ID is either missing or of invalid type" });
+    }
+
+    const student = await Student.findById(req.params.student_id).populate(
+      "class",
+      "name current_sem start_year end_year"
+    );
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    return res.status(200).json({ student });
+  } catch (err) {
+    return next(err);
+  }
+};
