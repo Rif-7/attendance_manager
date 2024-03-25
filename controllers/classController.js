@@ -117,13 +117,6 @@ exports.update_class = [
         return res.status(404).json({ error: "Tutor not found" });
       }
 
-      const oldTutor = await Tutor.findById(class_.tutor);
-      oldTutor.class = "";
-      await oldTutor.save();
-
-      tutor.class = class_.id;
-      await tutor.save();
-
       class_.name = req.params.name;
       class_.current = req.params.current_sem;
       class_.tutor = tutor.id;
@@ -147,7 +140,10 @@ exports.get_class_info = async (req, res, next) => {
         .json({ error: "Class ID is either missing or of invalid type" });
     }
 
-    const class_ = await Class.findById(req.params.class_id);
+    const class_ = await Class.findById(req.params.class_id).populate(
+      "tutor",
+      "f_name l_name"
+    );
     if (!class_) {
       return res.status(404).json({ error: "Class not found" });
     }
