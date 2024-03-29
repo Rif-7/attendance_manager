@@ -1,3 +1,4 @@
+const Attendance = require("../models/Attendance");
 const Class = require("../models/Class");
 const Exam = require("../models/Exam");
 const { body, validationResult } = require("express-validator");
@@ -61,6 +62,32 @@ exports.get_exam_list = async (req, res, next) => {
   try {
     const exam_list = await Exam.find().populate("class", "name current_sem");
     return res.status(200).json({ exam_list });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.get_exam_info = async (req, res, next) => {
+  try {
+    if (
+      !req.params.exam_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.exam_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Exam ID is either missing or of invalid type" });
+    }
+
+    const exam = await Exam.findById(req.params.exam_id);
+    if (!exam) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
+
+    const attendance_list = await Attendance.find({ exam: exam.id })
+      .populate("time_formatted")
+      .populate("student", "f_name l_name rollno");
+
+    return res.status(200).json({ exam, attendance_list });
   } catch (err) {
     return next(err);
   }
