@@ -2,6 +2,7 @@ const Attendance = require("../models/Attendance");
 const Class = require("../models/Class");
 const Exam = require("../models/Exam");
 const { body, validationResult } = require("express-validator");
+const Student = require("../models/Student");
 
 exports.create_exam = [
   body("name")
@@ -88,6 +89,94 @@ exports.get_exam_info = async (req, res, next) => {
       .populate("student", "f_name l_name rollno");
 
     return res.status(200).json({ exam, attendance_list });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.mark_attendance = async (req, res, next) => {
+  try {
+    if (
+      !req.params.exam_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.exam_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Exam ID is either missing or of invalid type" });
+    }
+
+    const exam = await Exam.findById(req.params.exam_id);
+    if (!exam) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
+
+    if (
+      !req.params.student_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.student_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Student ID is either missing or of invalid type" });
+    }
+
+    const student = await Student.findById(req.params.student_id);
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    if (student.class != exam.class) {
+      return res
+        .status(409)
+        .json({ error: "The student does not have this exam" });
+    }
+
+    const attendance = new Attendance({
+      exam: exam.id,
+      student: student.id,
+    });
+
+    await attendance.save();
+    return res.status(200).json({ success: "Attendance marked successfully" });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.unmark_attendance = async (req, res, next) => {
+  try {
+    if (
+      !req.params.attendance_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.exam_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Attendance ID is either missing or of invalid type" });
+    }
+
+    await Attendance.findByIdAndDelete(req.params.attendance_id);
+    return res.status(200).json({ success: "Attendance removed successfully" });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.get_attendance_list = async (req, res, next) => {
+  try {
+    if (
+      !req.params.exam_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.exam_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Exam ID is either missing or of invalid type" });
+    }
+
+    const attendance_list = await Attendance.find({
+      exam: req.params.exam_id,
+    }).populate("student", "f_name l_name rollno");
+
+    return res.status(200).json({ attendance_list });
   } catch (err) {
     return next(err);
   }
