@@ -29,23 +29,23 @@ exports.create_exam = [
       }
 
       if (
-        !req.params.class_id ||
-        !mongoose.Types.ObjectId.isValid(req.params.class_id)
+        !req.body.class_id ||
+        !mongoose.Types.ObjectId.isValid(req.body.class_id)
       ) {
         return res
           .status(400)
           .json({ error: "Class ID is either missing or of invalid type" });
       }
 
-      const class_ = await Class.findById(req.params.class_id);
+      const class_ = await Class.findById(req.body.class_id);
       if (!class_) {
         return res.status(404).json({ error: "Class not found" });
       }
 
       const exam = new Exam({
-        name: req.params.name,
-        date: req.params.date,
-        time: req.params.time,
+        name: req.body.name,
+        date: req.body.date,
+        time: req.body.time,
         class: class_.id,
       });
 

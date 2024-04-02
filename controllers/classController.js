@@ -31,24 +31,24 @@ exports.create_class = [
       }
 
       if (
-        !req.params.tutor_id ||
-        !mongoose.Types.ObjectId.isValid(req.params.tutor_id)
+        !req.body.tutor_id ||
+        !mongoose.Types.ObjectId.isValid(req.body.tutor_id)
       ) {
         return res
           .status(400)
           .json({ error: "Tutor ID is either missing or of invalid type" });
       }
 
-      const tutor = await Tutor.findById(req.params.tutor_id);
+      const tutor = await Tutor.findById(req.body.tutor_id);
       if (!tutor) {
         return res.status(404).json({ error: "Tutor not found" });
       }
 
       const class_ = new Class({
-        name: req.params.name,
-        current_sem: req.params.current_sem,
-        start_year: req.params.start_year,
-        end_year: req.params.end_year,
+        name: req.body.name,
+        current_sem: req.body.current_sem,
+        start_year: req.body.start_year,
+        end_year: req.body.end_year,
         tutor: tutor.id,
       });
       await class_.save();
@@ -104,21 +104,21 @@ exports.update_class = [
       }
 
       if (
-        !req.params.tutor_id ||
-        !mongoose.Types.ObjectId.isValid(req.params.tutor_id)
+        !req.body.tutor_id ||
+        !mongoose.Types.ObjectId.isValid(req.body.tutor_id)
       ) {
         return res
           .status(400)
           .json({ error: "Tutor ID is either missing or of invalid type" });
       }
 
-      const tutor = await Tutor.findById(req.params.tutor_id);
+      const tutor = await Tutor.findById(req.body.tutor_id);
       if (!tutor) {
         return res.status(404).json({ error: "Tutor not found" });
       }
 
-      class_.name = req.params.name;
-      class_.current = req.params.current_sem;
+      class_.name = req.body.name;
+      class_.current_sem = req.body.current_sem;
       class_.tutor = tutor.id;
       await class_.save();
 

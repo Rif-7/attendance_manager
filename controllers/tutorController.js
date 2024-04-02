@@ -23,8 +23,8 @@ exports.create_tutor = [
       }
 
       const tutor = new Tutor({
-        f_name: req.params.f_name,
-        l_name: req.params.l_name,
+        f_name: req.body.f_name,
+        l_name: req.body.l_name,
       });
 
       await tutor.save();
@@ -81,8 +81,8 @@ exports.update_tutor = [
         return res.status(404).json({ error: "Tutor not found" });
       }
 
-      tutor.f_name = req.params.f_name;
-      tutor.l_name = req.params.l_name;
+      tutor.f_name = req.body.f_name;
+      tutor.l_name = req.body.l_name;
       await tutor.save();
 
       return res.status(200).json({ success: "Tutor updated successfully" });

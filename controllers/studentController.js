@@ -1,4 +1,4 @@
-const Student = require("../modles/Student");
+const Student = require("../models/Student");
 const Class = require("../models/Class");
 const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
@@ -30,21 +30,21 @@ exports.create_student = [
       }
 
       if (
-        !req.params.class_id ||
-        !mongoose.Types.ObjectId.isValid(req.params.class_id)
+        !req.body.class_id ||
+        !mongoose.Types.ObjectId.isValid(req.body.class_id)
       ) {
         return res
           .status(400)
           .json({ error: "Class ID is either missing or of invalid type" });
       }
 
-      const class_ = await Class.findById(req.params.class_id);
+      const class_ = await Class.findById(req.body.class_id);
       if (!class_) {
         return res.status(404).json({ error: "Class not found" });
       }
 
       const roll_already_exists = await Student.find({
-        rollno: req.params.rollno,
+        rollno: req.body.rollno,
       });
       if (roll_already_exists) {
         return res
@@ -53,10 +53,10 @@ exports.create_student = [
       }
 
       const student = new Student({
-        f_name: req.params.f_name,
-        l_name: req.params.l_name,
+        f_name: req.body.f_name,
+        l_name: req.body.l_name,
         class: class_.id,
-        rollno: req.params.rollno,
+        rollno: req.body.rollno,
       });
       await student.save();
 
@@ -119,22 +119,22 @@ exports.update_student = [
       }
 
       if (
-        !req.params.class_id ||
-        !mongoose.Types.ObjectId.isValid(req.params.class_id)
+        !req.body.class_id ||
+        !mongoose.Types.ObjectId.isValid(req.body.class_id)
       ) {
         return res
           .status(400)
           .json({ error: "Class ID is either missing or of invalid type" });
       }
 
-      const class_ = await Class.findById(req.params.class_id);
+      const class_ = await Class.findById(req.body.class_id);
       if (!class_) {
         return res.status(404).json({ error: "Class not found" });
       }
 
-      student.f_name = req.params.f_name;
-      student.l_name = req.params.l_name;
-      student.rollno = req.params.rollno;
+      student.f_name = req.body.f_name;
+      student.l_name = req.body.l_name;
+      student.rollno = req.body.rollno;
       student.class = class_.id;
       await student.save();
 
