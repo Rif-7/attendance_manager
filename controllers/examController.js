@@ -174,11 +174,22 @@ exports.get_attendance_list = async (req, res, next) => {
         .json({ error: "Exam ID is either missing or of invalid type" });
     }
 
+    const exam = await Exam.findById(req.params.exam_id);
+    if (!exam) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
+
     const attendance_list = await Attendance.find({
       exam: req.params.exam_id,
     }).populate("student", "f_name l_name rollno");
 
-    return res.status(200).json({ attendance_list });
+    const attended_ids = attendance_list.map((student) => student.student._id);
+    const absentee_list = await Student.find({
+      _id: { $nin: attended_ids },
+      class: exam.class,
+    });
+
+    return res.status(200).json({ attendance_list, absentee_list });
   } catch (err) {
     return next(err);
   }
