@@ -28,7 +28,9 @@ exports.create_tutor = [
       });
 
       await tutor.save();
-      return res.status(200).json({ success: "Tutor created successfully" });
+      return res
+        .status(200)
+        .json({ success: "Tutor created successfully", tutor_id: tutor.id });
     } catch (err) {
       return next(err);
     }

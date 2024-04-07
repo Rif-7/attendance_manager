@@ -46,7 +46,8 @@ exports.create_student = [
       const roll_already_exists = await Student.find({
         rollno: req.body.rollno,
       });
-      if (roll_already_exists) {
+      console.log(roll_already_exists);
+      if (roll_already_exists.length !== 0) {
         return res
           .status(409)
           .json({ error: "Student with this roll number already exists" });
@@ -69,9 +70,10 @@ exports.create_student = [
 
 exports.get_student_list = async (req, res, next) => {
   try {
-    const student_list = await Student()
-      .find()
-      .populate("class", "name current_sem");
+    const student_list = await Student.find().populate(
+      "class",
+      "name current_sem"
+    );
     return res.status(200).json({ student_list });
   } catch (err) {
     return next(err);

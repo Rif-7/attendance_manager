@@ -1,6 +1,7 @@
 const Attendance = require("../models/Attendance");
 const Class = require("../models/Class");
 const Exam = require("../models/Exam");
+const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
 const Student = require("../models/Student");
 
@@ -16,18 +17,19 @@ exports.create_exam = [
   body("time")
     .trim()
     .custom((time) => {
-      if (time != "FN" && time != "AN") {
+      if (time !== "FN" && time !== "AN") {
         throw new Error("Exam time should either be 'FN' or 'AN'");
       }
+      return true;
     })
     .escape(),
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log(errors.array());
         return res.status(400).json({ error: errors.array()[0] });
       }
-
       if (
         !req.body.class_id ||
         !mongoose.Types.ObjectId.isValid(req.body.class_id)
@@ -48,12 +50,12 @@ exports.create_exam = [
         time: req.body.time,
         class: class_.id,
       });
-
       await exam.save();
       return res
         .status(200)
         .json({ success: "Exam created successfully", exam_id: exam.id });
     } catch (err) {
+      console.log(err);
       return next(err);
     }
   },

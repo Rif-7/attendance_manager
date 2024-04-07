@@ -13,4 +13,6 @@ ExamSchema.virtual("date_formatted").get(function () {
   return DateTime.fromJSDate(this.date).setLocale("en-gb").toLocaleString();
 });
 
+ExamSchema.set("toJSON", { getters: true });
+
 module.exports = mongoose.model("Exam", ExamSchema);
