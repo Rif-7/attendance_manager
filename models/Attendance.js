@@ -12,4 +12,6 @@ AttendanceSchema.virtual("time_formatted").get(function () {
   return DateTime.fromJSDate(this.time).toLocaleString(DateTime.DATETIME_MED);
 });
 
+AttendanceSchema.set("toJSON", { getters: true });
+
 module.exports = mongoose.model("Attendance", AttendanceSchema);

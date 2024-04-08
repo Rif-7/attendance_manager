@@ -127,10 +127,20 @@ exports.mark_attendance = async (req, res, next) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    if (student.class != exam.class) {
+    if (!student.class.equals(exam.class)) {
       return res
         .status(409)
         .json({ error: "The student does not have this exam" });
+    }
+
+    const already_attended = await Attendance.findOne({
+      student: student._id,
+      exam: exam._id,
+    });
+    if (already_attended) {
+      return res.status(409).json({
+        error: "The student has already attended the exam",
+      });
     }
 
     const attendance = new Attendance({
@@ -141,6 +151,7 @@ exports.mark_attendance = async (req, res, next) => {
     await attendance.save();
     return res.status(200).json({ success: "Attendance marked successfully" });
   } catch (err) {
+    console.log(err);
     return next(err);
   }
 };
@@ -148,17 +159,29 @@ exports.mark_attendance = async (req, res, next) => {
 exports.unmark_attendance = async (req, res, next) => {
   try {
     if (
-      !req.params.attendance_id ||
+      !req.params.exam_id ||
       !mongoose.Types.ObjectId.isValid(req.params.exam_id)
     ) {
       return res
         .status(400)
-        .json({ error: "Attendance ID is either missing or of invalid type" });
+        .json({ error: "Exam ID is either missing or of invalid type" });
+    }
+    if (
+      !req.params.student_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.student_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Student ID is either missing or of invalid type" });
     }
 
-    await Attendance.findByIdAndDelete(req.params.attendance_id);
+    await Attendance.findOneAndDelete({
+      student: req.params.student_id,
+      exam: req.params.exam_id,
+    });
     return res.status(200).json({ success: "Attendance removed successfully" });
   } catch (err) {
+    console.log(err);
     return next(err);
   }
 };
@@ -191,6 +214,7 @@ exports.get_attendance_list = async (req, res, next) => {
 
     return res.status(200).json({ attendance_list, absentee_list });
   } catch (err) {
+    console.log(err);
     return next(err);
   }
 };
