@@ -6,6 +6,7 @@ const StudentSchema = new Schema({
   l_name: { type: String, required: true, maxLength: 25 },
   class: { type: Schema.Types.ObjectId, required: true, ref: "Class" },
   rollno: { type: String, required: true },
+  fingerprintID: { type: Number },
 });
 
 StudentSchema.virtual("roll_no_int").get(function () {

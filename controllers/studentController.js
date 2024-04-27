@@ -43,11 +43,10 @@ exports.create_student = [
         return res.status(404).json({ error: "Class not found" });
       }
 
-      const roll_already_exists = await Student.find({
+      const roll_already_exists = await Student.findOne({
         rollno: req.body.rollno,
       });
-      console.log(roll_already_exists);
-      if (roll_already_exists.length !== 0) {
+      if (roll_already_exists) {
         return res
           .status(409)
           .json({ error: "Student with this roll number already exists" });
@@ -167,6 +166,32 @@ exports.get_student_info = async (req, res, next) => {
     }
 
     return res.status(200).json({ student });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.set_fingerprint_id = async (req, res, next) => {
+  try {
+    const student = await Student.findOne({ rollno: req.params.rollno });
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    if (!req.body.fingerprint_id) {
+      return res.status(404).json({ error: "Fingerprint ID missing" });
+    }
+    const fingerprintID = parseInt(req.body.fingerprint_id);
+    id_already_exists = await Student.findOne({ fingerprintID: fingerprintID });
+    if (id_already_exists) {
+      return res.status(409).json({ error: "Fingerprint ID already exists" });
+    }
+
+    student.fingerprintID = fingerprintID;
+    await student.save();
+    return res
+      .status(200)
+      .json({ success: "Fingerprint ID saved successfully" });
   } catch (err) {
     return next(err);
   }
