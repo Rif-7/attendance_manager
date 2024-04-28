@@ -216,7 +216,7 @@ exports.set_fingerprint_id = async (req, res, next) => {
     }
     const fingerprintID = parseInt(req.body.fingerprint_id);
     id_already_exists = await Student.findOne({ fingerprintID: fingerprintID });
-    if (id_already_exists) {
+    if (id_already_exists && !id_already_exists._id.equals(student._id)) {
       return res.status(409).json({ error: "Fingerprint ID already exists" });
     }
 
