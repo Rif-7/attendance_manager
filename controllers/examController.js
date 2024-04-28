@@ -196,7 +196,10 @@ exports.get_attendance_list = async (req, res, next) => {
         .json({ error: "Exam ID is either missing or of invalid type" });
     }
 
-    const exam = await Exam.findById(req.params.exam_id);
+    const exam = await Exam.findById(req.params.exam_id).populate(
+      "class",
+      "name current_sem"
+    );
     if (!exam) {
       return res.status(404).json({ error: "Exam not found" });
     }
@@ -211,7 +214,7 @@ exports.get_attendance_list = async (req, res, next) => {
       class: exam.class,
     });
 
-    return res.status(200).json({ attendance_list, absentee_list });
+    return res.status(200).json({ attendance_list, absentee_list, exam });
   } catch (err) {
     console.log(err);
     return next(err);
@@ -271,7 +274,7 @@ exports.mark_fingerprint_attendance = async (req, res, next) => {
     });
     if (already_attended) {
       return res.status(409).json({
-        error: "The student has already attended this exam",
+        error: `The student, ${student.f_name} ${student.l_name} has already attended this exam`,
       });
     }
 
