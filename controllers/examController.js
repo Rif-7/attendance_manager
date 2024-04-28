@@ -218,6 +218,25 @@ exports.get_attendance_list = async (req, res, next) => {
   }
 };
 
+exports.get_todays_exams = async (req, res, next) => {
+  try {
+    const currentDate = new Date();
+
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const exam_list = await Exam.find({
+      date: { $gte: currentDate, $lte: endOfDay },
+    }).populate("class", "name current_sem");
+
+    return res.status(200).json({ exam_list });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 exports.mark_fingerprint_attendance = async (req, res, next) => {
   try {
     if (!req.params.exam) {
