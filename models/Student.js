@@ -9,8 +9,4 @@ const StudentSchema = new Schema({
   fingerprintID: { type: Number },
 });
 
-StudentSchema.virtual("roll_no_int").get(function () {
-  return parseInt(this.rollno.slice(-2));
-});
-
 module.exports = mongoose.model("Student", StudentSchema);

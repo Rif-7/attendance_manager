@@ -171,9 +171,42 @@ exports.get_student_info = async (req, res, next) => {
   }
 };
 
+exports.get_student_by_rollno = async (req, res, next) => {
+  try {
+    if (!req.params.rollno) {
+      return res.status(400).json({ error: "Roll number is missing" });
+    }
+
+    const student = await Student.findOne({
+      rollno: req.params.rollno,
+    }).populate("class", "name current_sem");
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    return res.status(200).json({
+      id: student.id,
+      name: `${student.f_name} ${student.l_name}`,
+      class: student.class.name,
+      semester: student.class.current_sem,
+      rollno: student.rollno,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 exports.set_fingerprint_id = async (req, res, next) => {
   try {
-    const student = await Student.findOne({ rollno: req.params.rollno });
+    if (
+      !req.params.student_id ||
+      !mongoose.Types.ObjectId.isValid(req.params.student_id)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Student ID is either missing or of invalid type" });
+    }
+    const student = await Student.findById(req.params.student_id);
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
