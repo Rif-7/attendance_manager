@@ -139,7 +139,7 @@ exports.mark_attendance = async (req, res, next) => {
     });
     if (already_attended) {
       return res.status(409).json({
-        error: "The student has already attended the exam",
+        error: "The student has already attended this exam",
       });
     }
 
@@ -147,7 +147,6 @@ exports.mark_attendance = async (req, res, next) => {
       exam: exam.id,
       student: student.id,
     });
-
     await attendance.save();
     return res.status(200).json({ success: "Attendance marked successfully" });
   } catch (err) {
@@ -215,6 +214,63 @@ exports.get_attendance_list = async (req, res, next) => {
     return res.status(200).json({ attendance_list, absentee_list });
   } catch (err) {
     console.log(err);
+    return next(err);
+  }
+};
+
+exports.mark_fingerprint_attendance = async (req, res, next) => {
+  try {
+    if (!req.params.exam) {
+      return res.status(400).json({ error: "Exam ID is missing" });
+    }
+
+    const exam = await Exam.findOne({ name: req.params.exam });
+    if (!exam) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
+
+    if (!req.params.fingerprint_id) {
+      return res.status(400).json({ error: "Fingerprint ID is missing" });
+    }
+    const fingerprintID = parseInt(req.params.fingerprint_id);
+    const student = await Student.findOne({ fingerprintID: fingerprintID });
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "No student found with this fingerprint" });
+    }
+
+    if (!student.class.equals(exam.class)) {
+      return res
+        .status(409)
+        .json({ error: "The student does not have this exam" });
+    }
+
+    const already_attended = await Attendance.findOne({
+      student: student._id,
+      exam: exam._id,
+    });
+    if (already_attended) {
+      return res.status(409).json({
+        error: "The student has already attended this exam",
+      });
+    }
+
+    const attendance = new Attendance({
+      exam: exam.id,
+      student: student.id,
+    });
+    await attendance.save();
+
+    return res.status(200).json({
+      success: "Attendance marked successfulyy",
+      student: {
+        name: `${student.f_name} ${student.l_name}`,
+        rollno: student.rollno,
+        time: attendance.time_formatted,
+      },
+    });
+  } catch (err) {
     return next(err);
   }
 };
